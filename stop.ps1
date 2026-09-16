@@ -2,7 +2,7 @@
 Unregister-Event -SourceIdentifier "AntiShutdownTimer" -ErrorAction SilentlyContinue
 
 Write-Host "=====================================================" -ForegroundColor Cyan
-Write-Host " VIGILANTE DE APAGADO ACTIVO (Modo Terminal en Vivo)" -ForegroundColor Cyan
+Write-Host " GAY SHUTDOWN" -ForegroundColor Cyan
 Write-Host "=====================================================" -ForegroundColor Cyan
 Write-Host "Presiona CTRL+C para detener la vigilancia." -ForegroundColor Yellow
 Write-Host ""
@@ -18,7 +18,7 @@ while ($true) {
     # Si el comando tuvo éxito (canceló algo), lo registramos
     if ($LASTEXITCODE -eq 0) {
         $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-        $mensaje = "[$fecha] ¡ALERTA! Se detectó y canceló un intento de apagado."
+        $mensaje = "[$fecha] ¡KOM SUSSER TOD!."
         
         # Mostrar en pantalla en rojo
         Write-Host $mensaje -ForegroundColor Red
