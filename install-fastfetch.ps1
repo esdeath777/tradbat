@@ -1,16 +1,22 @@
 $ErrorActionPreference = 'Stop'
 
-$artSource = Join-Path $PSScriptRoot 'ascii-art.txt'
-$configDir = Join-Path $env:USERPROFILE '.config\fastfetch'
+$userProfile = [Environment]::GetFolderPath('UserProfile')
+if ([string]::IsNullOrWhiteSpace($userProfile)) {
+    throw 'No se pudo detectar la carpeta del usuario de Windows.'
+}
+
+$scriptRoot = $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($scriptRoot)) {
+    $scriptRoot = (Get-Location).Path
+}
+
+$artSource = Join-Path $scriptRoot 'ascii-art.txt'
+$configDir = Join-Path $userProfile '.config\fastfetch'
 $logoDestination = Join-Path $configDir 'ascii-art.txt'
 $configPath = Join-Path $configDir 'config.jsonc'
 
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    throw 'WinGet no está disponible. Instala o actualiza App Installer desde Microsoft Store y vuelve a ejecutar este script.'
-}
-
-if (-not (Test-Path -LiteralPath $artSource)) {
-    throw "No se encontró el archivo del ASCII art: $artSource"
+    throw 'WinGet no estÃ¡ disponible. Instala o actualiza App Installer desde Microsoft Store y vuelve a ejecutar este script.'
 }
 
 Write-Host 'Comprobando Fastfetch con WinGet...'
@@ -19,14 +25,48 @@ if ($installed -notmatch 'Fastfetch') {
     Write-Host 'Instalando Fastfetch con WinGet...'
     winget install --id Fastfetch-cli.Fastfetch --exact --source winget --accept-source-agreements --accept-package-agreements
     if ($LASTEXITCODE -ne 0) {
-        throw "WinGet terminó con el código $LASTEXITCODE."
+        throw "WinGet terminÃ³ con el cÃ³digo $LASTEXITCODE."
     }
 } else {
-    Write-Host 'Fastfetch ya está instalado; se conservará la instalación actual.'
+    Write-Host 'Fastfetch ya estÃ¡ instalado; se conservarÃ¡ la instalaciÃ³n actual.'
 }
 
 New-Item -ItemType Directory -Path $configDir -Force | Out-Null
-Copy-Item -LiteralPath $artSource -Destination $logoDestination -Force
+if (Test-Path -LiteralPath $artSource) {
+    Copy-Item -LiteralPath $artSource -Destination $logoDestination -Force
+} else {
+    Write-Host 'No se encontrÃ³ ascii-art.txt junto al script; usando el logo incluido.'
+    $embeddedArt = @'
+............:::.:::::::::-::::::::::::::::::::::::.........
+.............::::..:::::::::::::::::::::::::::::::::.....  
+..........:::::::::..::--:::::::::::::::::::::::::::::.....
+........:::::::::::::..:::::::::::::::::::::::::::::::::::. 
+.....::::::::::::::::::...:::::::::::::::::::::::::::::::::
+....::::::::::--:::::::::...:::::::::::::::::::::::::::::::
+....:::::::::::::::::-+-:::...:::::::::::::::::::::::::::::
+.......:::::==:::::::--***-::...:::::::::::::::::::.:::::::
+.....::-:::::=**-:::::*=#%%#*+:..::::::::::::::::::::.:::::
+...:::::==::::#%%#=:::+#%%%%%%%%%#--::::::::::::::::::.::::
+...=::=::#*-:::%%#=#=:=%%%%%%+...#*=--:::::::::::::::::..::
+......=+::#%*::*%%%%%#*%%%-:=*:::#%%--:::::::::::::::::...:
+......-++:-%%%-=%%%%%%#%-:#%%#=*#%%%*-:::::::::-==-:::::...
+ .....:+++:*%%%*%%%%%*%**%%%%@%%%%%%#-:::.::::::::::::::...
+  . ...-++==%%%%%%%%%%%%%%%%%%%%%%%%=++::..:::::::::::::.  
+     ..:===-%%@%%%%%%%%%%%%%%%%%%%%*##%-:...:::::::::::.:. 
+       .=+++*%%%%%%%%%%%%%%%%%%%%%%%%%%-:....::::::::::::. 
+    :.   ++++++#%#%%%%%%%%%%%%%%%%%%%%%-:.....:::::.::::.=.
+    ..-. .=++= :%=:*%%%%%%%%%%%%%%%%%%%=:.....:::::..::::-.
+     .-==+++-.*%%#*#%%%%%%%%%%%%%%%#%%%#:.... .:::. .......
+           .:-++***%%%%%%%%%%%%%%%%%%%%%#...  .::.   ......
+                -++*%%%%%%%%%%%%%%%%%%%%@%+.. .::.   ...:..
+                  .-:*%%%%%%%%%%%%%%%%%%%%***-...  .....-..
+                     :=+++*********####%+.-**+:.    ....::.
+                                           .=+:.     ..:::.
+                                             ::     ...--.-
+:.....                                               ...:-:
+'@
+    Set-Content -LiteralPath $logoDestination -Value $embeddedArt -Encoding UTF8
+}
 
 $config = @'
 {
@@ -82,13 +122,13 @@ if (-not ($pathItems | Where-Object { $_.TrimEnd('\') -ieq $binDir.TrimEnd('\') 
     [Environment]::SetEnvironmentVariable('Path', (($pathItems + $binDir) -join ';'), 'User')
 }
 
-Write-Host "Configuración creada en: $configPath"
+Write-Host "ConfiguraciÃ³n creada en: $configPath"
 Write-Host "Logo instalado en: $logoDestination"
 Write-Host "Comando creado: dung"
 
 if (Test-Path -LiteralPath $dungPath) {
-    Write-Host "`nValidación:"
+    Write-Host "`nValidaciÃ³n:"
     & $dungPath
 } else {
-    Write-Host "`nFastfetch fue instalado. Cierra y vuelve a abrir PowerShell para actualizar el PATH; después ejecuta: dung"
+    Write-Host "`nFastfetch fue instalado. Cierra y vuelve a abrir PowerShell para actualizar el PATH; despuÃ©s ejecuta: dung"
 }
