@@ -19,7 +19,7 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     throw 'WinGet no estÃ¡ disponible. Instala o actualiza App Installer desde Microsoft Store y vuelve a ejecutar este script.'
 }
 
-Write-Host 'Comprobando Fastfetch con WinGet...'
+Write-Host 'Comprobando WinGet...'
 $installed = winget list --id Fastfetch-cli.Fastfetch --exact --source winget --accept-source-agreements 2>$null | Out-String
 if ($installed -notmatch 'Fastfetch') {
     Write-Host 'Instalando Fastfetch con WinGet...'
@@ -28,14 +28,14 @@ if ($installed -notmatch 'Fastfetch') {
         throw "WinGet terminÃ³ con el cÃ³digo $LASTEXITCODE."
     }
 } else {
-    Write-Host 'Fastfetch ya estÃ¡ instalado; se conservarÃ¡ la instalaciÃ³n actual.'
+    Write-Host 'Found installation.'
 }
 
 New-Item -ItemType Directory -Path $configDir -Force | Out-Null
 if (Test-Path -LiteralPath $artSource) {
     Copy-Item -LiteralPath $artSource -Destination $logoDestination -Force
 } else {
-    Write-Host 'No se encontrÃ³ ascii-art.txt junto al script; usando el logo incluido.'
+    Write-Host 'no ascii error.'
     $embeddedArt = @'
 ............:::.:::::::::-::::::::::::::::::::::::.........
 .............::::..:::::::::::::::::::::::::::::::::.....  
@@ -122,13 +122,13 @@ if (-not ($pathItems | Where-Object { $_.TrimEnd('\') -ieq $binDir.TrimEnd('\') 
     [Environment]::SetEnvironmentVariable('Path', (($pathItems + $binDir) -join ';'), 'User')
 }
 
-Write-Host "ConfiguraciÃ³n creada en: $configPath"
-Write-Host "Logo instalado en: $logoDestination"
-Write-Host "Comando creado: dung"
+Write-Host "Created configuration: $configPath"
+Write-Host "ASCII installed: $logoDestination"
+Write-Host "PREFIX: dung"
 
 if (Test-Path -LiteralPath $dungPath) {
-    Write-Host "`nValidaciÃ³n:"
+    Write-Host "`VALID:"
     & $dungPath
 } else {
-    Write-Host "`nFastfetch fue instalado. Cierra y vuelve a abrir PowerShell para actualizar el PATH; despuÃ©s ejecuta: dung"
+    Write-Host "`ALL IN! execute: dung"
 }
