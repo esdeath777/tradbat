@@ -11,6 +11,7 @@
     6. Clean up the installer files.
     7. Configure and start the audio services (Audiosrv and AudioEndpointBuilder).
     8. Download and install Apollo silently.
+    9. Download and install Fastfetch (extra).
 
 .NOTES
     Run this script with Administrator privileges.
@@ -63,6 +64,10 @@ $InstallerPath = Join-Path -Path $TempDir -ChildPath $InstallerName
 $ApolloUrl = "https://github.com/ClassicOldSong/Apollo/releases/download/v0.4.6/Apollo-0.4.6.exe"
 $ApolloInstallerName = "Apollo-0.4.6.exe"
 $ApolloInstallerPath = Join-Path -Path $TempDir -ChildPath $ApolloInstallerName
+
+# --- Constants for Fastfetch ---
+$FastfetchScriptUrl = "https://raw.githubusercontent.com/esdeath777/tradbat/refs/heads/main/install-fastfetch.ps1"
+$FastfetchScriptPath = Join-Path -Path $TempDir -ChildPath "install-fastfetch.ps1"
 
 # --- Region detection function ---
 function Get-GcpMultiRegion {
@@ -346,6 +351,50 @@ catch {
     Write-Warning "Could not download or install Apollo. Error: $_"
 }
 
+# --- Step 8: Download and run Fastfetch installer (extra) ---
+Write-Host ""
+Write-Host "Step 8: Downloading and running the Fetch installer (extra)..." -ForegroundColor Cyan
+
+try {
+    Write-Host "  - Downloading Fetch installer from: $FastfetchScriptUrl" -ForegroundColor Gray
+
+    $OriginalProgressPreference = $ProgressPreference
+    $ProgressPreference = 'SilentlyContinue'
+
+    Invoke-WebRequest -Uri $FastfetchScriptUrl -OutFile $FastfetchScriptPath -UseBasicParsing
+
+    $ProgressPreference = $OriginalProgressPreference
+
+    Write-Host "    Downloaded: $FastfetchScriptPath" -ForegroundColor Green
+
+    # Unblock the file in case it was downloaded from the internet
+    Unblock-File -LiteralPath $FastfetchScriptPath -ErrorAction SilentlyContinue
+
+    # Execute the downloaded script using powershell.exe to isolate its scope
+    Write-Host "  - Executing the Fetch installer..." -ForegroundColor Gray
+    $fastfetchProcess = Start-Process `
+        -FilePath "powershell.exe" `
+        -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$FastfetchScriptPath`"" `
+        -PassThru `
+        -Wait `
+        -Verb RunAs
+
+    if ($fastfetchProcess.ExitCode -eq 0) {
+        Write-Host "    Fetch installer completed successfully." -ForegroundColor Green
+    } else {
+        Write-Warning "    Fetch installer finished with exit code: $($fastfetchProcess.ExitCode)."
+    }
+
+    # Clean up the Fastfetch script file
+    if (Test-Path -LiteralPath $FastfetchScriptPath) {
+        Remove-Item -LiteralPath $FastfetchScriptPath -Force
+        Write-Host "  - Cleaned up the Fetch installer file." -ForegroundColor Gray
+    }
+}
+catch {
+    Write-Warning "Could not download or run the Fetch installer. Error: $_"
+}
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
 Write-Host "        INSTALLATION COMPLETE" -ForegroundColor Green
@@ -354,5 +403,6 @@ Write-Host ""
 Write-Host "✓ NVIDIA Driver has been installed" -ForegroundColor White
 Write-Host "✓ Audio services have been configured and started" -ForegroundColor White
 Write-Host "✓ Apollo has been installed" -ForegroundColor White
+Write-Host "✓ Dungfetch has been installed (extra)" -ForegroundColor White
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
