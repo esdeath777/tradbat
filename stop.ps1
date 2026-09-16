@@ -1,6 +1,3 @@
-# Script para evitar el apagado no deseado en una VM de Google Cloud
-# Autor: Asistente de IA
-
 Write-Host "Iniciando bloqueo de apagado..." -ForegroundColor Cyan
 
 # 1. Prevenir apagados programados mediante el comando shutdown
